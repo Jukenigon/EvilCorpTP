@@ -7,6 +7,7 @@ import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import utils.Utils;
 import workers.Worker;
 
 import java.io.File;
@@ -58,6 +59,22 @@ public class Parsing {
         System.out.println("Finish");
     }
 
+    private void extract(JsonArray array){
+        for(int i = 0; i < array.size(); i++){
+            String tmp = array.get(i).toString();
+            tmp = tmp.replace("{", "");
+            tmp = tmp.replace("\"name\":", "");
+            tmp = tmp.replace(",\"activity\":", ";");
+            tmp = tmp.replace(",\"start\":", ";");
+            tmp = tmp.replace(",\"finish\":", ";");
+            tmp = tmp.replace(",\"date\":", ";");
+            tmp = tmp.replace("}", "");
+            System.out.println(tmp);
+            Utils utils = new Utils();
+            utils.writeLog(tmp);
+        }
+    }
+
     private boolean operation(){
         if(file){
             if(arguments.size() != 1){
@@ -66,15 +83,17 @@ public class Parsing {
             }else{
                 String str = null;
                 try {
-                    str = FileUtils.readFileToString(new File(arguments.get(1)));
+                    str = FileUtils.readFileToString(new File(arguments.get(0)));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                System.out.println(str);
                 JsonElement jelement = new JsonParser().parse(str);
                 JsonObject jobject = jelement.getAsJsonObject();
-                String result = jobject.get("translatedText").toString();
-                System.out.println(result);
+                JsonArray activities = jobject.getAsJsonArray("activities");
+                JsonArray robots = jobject.getAsJsonArray("robots");
+
+                extract(activities);
+                extract(robots);
             }
         }
 
